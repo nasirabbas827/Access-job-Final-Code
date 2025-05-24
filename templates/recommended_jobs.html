@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Recommended Jobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Recommended Jobs For You</h2>
+    </div>
+
+    {% if recommended_jobs %}
+    <div class="row">
+        {% for item in recommended_jobs %}
+        {% with job=item.job reasons=item.reasons %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-1">
+                                <a href="{% url 'job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a>
+                            </h4>
+                            <p class="text-muted mb-2">{{ job.location }} • {{ job.get_job_type_display }}</p>
+                        </div>
+                        <div>
+                            {% if job.is_remote %}
+                            <span class="badge bg-success">Remote</span>
+                            {% else %}
+                            <span class="badge bg-primary">On-site</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="badge bg-info text-dark me-1">
+                            {{ job.get_experience_level_display }}
+                        </span>
+                        {% if job.salary_min %}
+                        <span class="badge bg-warning text-dark">
+                            ${{ job.salary_min|floatformat:"0" }}{% if job.salary_max %} - ${{ job.salary_max|floatformat:"0" }}{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text text-muted mb-3">{{ job.description|truncatewords:25 }}</p>
+
+                    {% if job.skills.all %}
+                    <div class="mb-3">
+                        <h6 class="mb-2">Required Skills:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in job.skills.all %}
+                            <span class="badge bg-light text-dark border">{{ skill.skill_name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if reasons %}
+                    <div class="mb-3">
+                        <h6 class="mb-2">Why Recommended:</h6>
+                        <ul class="mb-0">
+                            {% for reason in reasons %}
+                            <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Posted {{ job.posted_date|timesince }} ago
+                        </small>
+                        <div>
+                            <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-primary me-2">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">No recommendations found</h4>
+        <p>We couldn't find jobs matching your profile. Try:</p>
+        <ul>
+            <li>Adding more skills to your profile</li>
+            <li>Updating your work experience</li>
+            <li>Broadening your location preferences</li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+        border-radius: 10px;
+        border: none;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+    }
+    .card-title a {
+        color: #2c3e50;
+        transition: color 0.2s;
+    }
+    .card-title a:hover {
+        color: #3498db;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} - Job Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary mb-4">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="card-title text-primary"><i class="fas fa-briefcase me-2"></i>{{ job.title }}</h2>
+                    <h5 class="text-muted">{{ job.company_name }}</h5>
+                </div>
+                <span class="badge bg-dark fs-6">{{ job.status|title }}</span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><i class="fas fa-map-marker-alt me-2 text-muted"></i><strong>Location:</strong> {{ job.location }}</p>
+                    <p><i class="fas fa-user-tie me-2 text-muted"></i><strong>Type:</strong> {{ job.job_type }}</p>
+                    <p><i class="fas fa-wifi me-2 text-muted"></i><strong>Remote:</strong> {{ job.is_remote|yesno:"Yes,No" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-level-up-alt me-2 text-muted"></i><strong>Experience:</strong> {{ job.experience_level|title }}</p>
+                    <p><i class="fas fa-money-bill-wave me-2 text-muted"></i><strong>Salary:</strong> {{ job.salary_min }} - {{ job.salary_max }} {{ job.salary_currency }} ({{ job.salary_type }})</p>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="mb-4">
+                <h5 class="text-decoration-underline">Job Description</h5>
+                <p>{{ job.description }}</p>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="text-decoration-underline">Requirements</h5>
+                <p>{{ job.requirements }}</p>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="text-decoration-underline">Responsibilities</h5>
+                <p>{{ job.responsibilities }}</p>
+            </div>
+
+            <div class="text-muted small">
+                <p><i class="fas fa-calendar-alt me-2"></i>Posted on: {{ job.posted_date }}</p>
+                <p><i class="fas fa-hourglass-end me-2"></i>Application Deadline: {{ job.application_deadline }}</p>
+                <p><i class="fas fa-calendar-times me-2"></i>Expiration Date: {{ job.expiration_date }}</p>
+            </div>
+
+            {% if job.status == 'active' and job.expiration_date > today %}
+            <div class="mt-4 d-flex flex-column flex-sm-row gap-2">
+                <form method="post" action="{% url 'apply_job' job.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-1"></i> Apply Now
+                    </button>
+                </form>
+                <form method="post" action="{% url 'bookmark_job' job.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-bookmark me-1"></i> Bookmark
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="alert alert-warning mt-4">
+                <i class="fas fa-exclamation-circle me-2"></i>This job is no longer accepting applications.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

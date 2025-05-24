@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom styles for the dashboard */
+    .dashboard-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .dashboard-header {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .dashboard-header h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .dashboard-header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    .notification-alert {
+        background: linear-gradient(to right, #28a745, #34c759);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.5s ease-in;
+    }
+
+    .notification-alert .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .search-form {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .search-form .form-control {
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .search-form .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+
+    .search-form .btn-primary {
+        background: linear-gradient(to right, #007bff, #00a8ff);
+        border: none;
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-form .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    }
+
+    .job-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+
+    .job-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .job-card h5 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .job-card p {
+        color: #636e72;
+        font-size: 0.95rem;
+    }
+
+    .job-card small {
+        color: #7f8c8d;
+        font-size: 0.85rem;
+    }
+
+    .job-card .job-details {
+        background: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-top: 1px solid #dfe6e9;
+    }
+
+    .no-jobs {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        color: #e74c3c;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-header text-center">
+            <h1 class="display-4"><i class="fas fa-briefcase me-3"></i>Welcome, {{ request.user.username }}!</h1>
+            <p class="lead">Discover your next career opportunity with personalized job recommendations.</p>
+        </div>
+
+        {% if new_jobs_count and new_jobs_count > 0 %}
+            <div class="notification-alert alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ new_jobs_count }} new job{{ new_jobs_count|pluralize }} posted!</strong> Explore the latest opportunities below.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        <form method="get" class="search-form row g-3">
+            <div class="col-md-4">
+                <input type="text" name="keyword" class="form-control" placeholder="Search by keyword" value="{{ filters.keyword }}">
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="location" class="form-control" placeholder="Location" value="{{ filters.location }}">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="min_salary" class="form-control" placeholder="Min Salary" value="{{ filters.min_salary }}">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="max_salary" class="form-control" placeholder="Max Salary" value="{{ filters.max_salary }}">
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> </button>
+            </div>
+        </form>
+
+{% if jobs %}
+        <div class="list-group">
+            {% for job in jobs %}
+                <a href="{% url 'job_detail' job.id %}" class="list-group-item list-group-item-action mb-2">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1 text">{{ job.title }}</h5>
+                        <small class="mb-1 badge bg-dark">{{ job.location }}</small>
+                    </div>
+                    <p class="mb-1 text-truncate" style="max-width: 70%;">{{ job.description }}</p>
+                    <small>
+                        <i class="fas fa-dollar-sign"></i> {{ job.salary_min }} - {{ job.salary_max }} {{ job.salary_currency }} /
+                        {{ job.salary_type }} &nbsp;|&nbsp; <i class="fas fa-clock"></i> {{ job.job_type }} &nbsp;|&nbsp; <i class="fas fa-briefcase"></i> {{ job.experience_level|title }}
+                    </small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center">No jobs found matching your criteria.</p>
+    {% endif %}
+
+</div>
+    </div>
+</div>
+{% endblock %}

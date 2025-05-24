@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}My Bookmarked Jobs{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2><i class="fas fa-bookmark me-2"></i>Bookmarked Jobs</h2>
+    <hr>
+
+    {% if bookmarks %}
+        <div class="list-group">
+            {% for bookmark in bookmarks %}
+                <a href="{% url 'job_detail' bookmark.job.id %}" class="list-group-item list-group-item-action mb-2">
+                    <h5 class="mb-1">{{ bookmark.job.title }}</h5>
+                    <p class="mb-1">{{ bookmark.job.company_name }} - {{ bookmark.job.location }}</p>
+                    <small><i class="fas fa-calendar-alt"></i> Bookmarked on {{ bookmark.created_at|date:"F j, Y" }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">You have not bookmarked any jobs yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

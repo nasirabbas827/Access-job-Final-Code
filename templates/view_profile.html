@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}My Professional Profile{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- CV Container -->
+            <div class="cv-container shadow-sm p-4 mb-5 bg-white rounded">
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mb-4">
+                    <a href="{% url 'update_profile' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </a>
+                    <div>
+                        <button class="btn btn-success me-2" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i> Print CV
+                        </button>
+                        {% if user_profile.resume_path %}
+                        <a href="{{ user_profile.resume_path.url }}" class="btn btn-primary" download>
+                            <i class="fas fa-download me-1"></i> Download Resume
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- CV Header -->
+                <div class="cv-header text-center mb-5">
+                    {% if user_profile.profile_picture %}
+                    <img src="{{ user_profile.profile_picture.url }}" 
+                         class="img-thumbnail rounded-circle mb-3" 
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" 
+                         style="width: 150px; height: 150px; margin: 0 auto;">
+                        <i class="fas fa-user text-secondary" style="font-size: 60px;"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <h1 class="mb-2">{{ user_profile.full_name }}</h1>
+                    <h3 class="text-primary mb-3">{{ user_profile.current_job_title }}</h3>
+                    
+                    <div class="d-flex flex-wrap justify-content-center gap-4">
+                        {% if user_profile.email %}
+                        <div><i class="fas fa-envelope me-1"></i> {{ user_profile.email }}</div>
+                        {% endif %}
+                        {% if user_profile.phone_number %}
+                        <div><i class="fas fa-phone me-1"></i> {{ user_profile.phone_number }}</div>
+                        {% endif %}
+                        {% if user_profile.address %}
+                        <div><i class="fas fa-map-marker-alt me-1"></i> {{ user_profile.address }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Professional Summary -->
+                {% if user_profile.summary %}
+                <div class="cv-section mb-5">
+                    <h2 class="section-title"><i class="fas fa-user-tie me-2"></i>Professional Summary</h2>
+                    <div class="section-content">
+                        <p>{{ user_profile.summary }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Work Experience -->
+                <div class="cv-section mb-5">
+                    <h2 class="section-title"><i class="fas fa-briefcase me-2"></i>Work Experience</h2>
+                    <div class="section-content">
+                        <div class="experience-item mb-4">
+                            <h3 class="job-title">{{ user_profile.current_job_title }}</h3>
+                            <h4 class="company-name text-muted">{{ user_profile.current_company }}</h4>
+                            {% if user_profile.years_of_experience %}
+                            <div class="experience-duration">
+                                <i class="fas fa-calendar-alt me-1"></i> 
+                                {{ user_profile.years_of_experience }} year{{ user_profile.years_of_experience|pluralize }} of experience
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                {% if user_profile.highest_education_level %}
+                <div class="cv-section mb-5">
+                    <h2 class="section-title"><i class="fas fa-graduation-cap me-2"></i>Education</h2>
+                    <div class="section-content">
+                        <div class="education-item">
+                            <h3>{{ user_profile.highest_education_level }}</h3>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Skills -->
+                <div class="cv-section mb-5">
+                    <h2 class="section-title"><i class="fas fa-tools me-2"></i>Additional Information</h2>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    {% if user_profile.age %}
+                                    <li class="mb-2"><strong>Age:</strong> {{ user_profile.age }}</li>
+                                    {% endif %}
+                                    {% if user_profile.gender %}
+                                    <li class="mb-2"><strong>Gender:</strong> {{ user_profile.get_gender_display }}</li>
+                                    {% endif %}
+                                    {% if user_profile.bio %}
+                                    <li class="mb-2"><strong>Bio:</strong> {{ user_profile.bio }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    {% if user_profile.preferred_location %}
+                                    <li class="mb-2"><strong>Preferred Location:</strong> {{ user_profile.preferred_location }}</li>
+                                    {% endif %}
+                                    {% if user_profile.expected_salary %}
+                                    <li class="mb-2"><strong>Expected Salary:</strong> {{ user_profile.expected_salary }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* CV Styling */
+    .cv-container {
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2.5rem;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .job-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .company-name {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .experience-duration {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .section-content {
+        padding-left: 1.5rem;
+    }
+
+    /* Print Styles */
+    @media print {
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        .cv-container {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .btn {
+            display: none !important;
+        }
+        a {
+            text-decoration: none !important;
+            color: black !important;
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .cv-container {
+            padding: 1.5rem;
+        }
+        .cv-header h1 {
+            font-size: 1.8rem;
+        }
+        .cv-header h3 {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+{% endblock %}
