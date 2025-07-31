@@ -21,6 +21,11 @@ class Profile(models.Model):
         ('remote', 'Remote'),
     ]
 
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+    )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100, default="")
     email = models.EmailField(default="")
@@ -40,8 +45,7 @@ class Profile(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     resume_path = models.FileField(upload_to='resumes/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
-
-    # New Fields
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     summary = models.TextField(blank=True, null=True)
     current_job_title = models.CharField(max_length=100, blank=True, null=True)
     current_company = models.CharField(max_length=100, blank=True, null=True)

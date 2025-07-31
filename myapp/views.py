@@ -68,25 +68,54 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+
 def user_register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.email = form.cleaned_data['email']
+            user.is_active = False  # prevent login until verified
             user.save()
 
-            # Create profile
+            # Create profile with status = Pending
             phone = form.cleaned_data['phone_number']
             addr = form.cleaned_data['address']
-            Profile.objects.create(user=user, email=user.email, phone_number=phone, address=addr)
+            profile = Profile.objects.create(user=user, email=user.email, phone_number=phone, address=addr)
 
-            login(request, user)
-            return redirect('dashboard')
-            
+            # Send verification email
+            verify_url = request.build_absolute_uri(reverse('verify_email', args=[user.username]))
+            send_mail(
+                subject='Verify Your Email',
+                message=f'Click the link to verify your email: {verify_url}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, 'Registration successful! Please verify your email to activate your account.')
+            return redirect('user_login')
     else:
         form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
+
+from django.contrib.auth.models import User  # make sure this import is at the top
+
+def verify_email(request, username):
+    try:
+        user_obj = User.objects.get(username=username)
+        profile = Profile.objects.get(user=user_obj)
+        profile.status = 'Approved'
+        profile.save()
+        user_obj.is_active = True
+        user_obj.save()
+        messages.success(request, 'Email verified successfully! You can now log in.')
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid verification link.')
+    return redirect('user_login')
 
 
 def user_login(request):
@@ -96,14 +125,20 @@ def user_login(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
+
             if user is not None:
-                login(request, user)
-                return redirect('dashboard')
+                profile = Profile.objects.get(user=user)
+                if profile.status != 'Approved':
+                    messages.error(request, 'Account not approved. Please verify your email.')
+                else:
+                    login(request, user)
+                    return redirect('dashboard')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect

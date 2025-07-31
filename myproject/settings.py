@@ -134,5 +134,5 @@ EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP host
 EMAIL_PORT = 587  # Typically 587 for TLS
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nasiryt.827@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'mtvp ruzp aqfu tfxt'  # Your email password
+EMAIL_HOST_PASSWORD = 'ddgc zhft gohg bjmz'  # Your email password
 DEFAULT_FROM_EMAIL = 'nasiryt.827@gmail.com'
